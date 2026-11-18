@@ -11,7 +11,12 @@ export async function addTodo(title: string): Promise<Todo> {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: crypto.randomUUID(), title, completed: false }),
+    body: JSON.stringify({
+      id: crypto.randomUUID(),
+      title,
+      completed: false,
+      createdAt: new Date().toISOString(),
+    }),
   });
   return res.json();
 }

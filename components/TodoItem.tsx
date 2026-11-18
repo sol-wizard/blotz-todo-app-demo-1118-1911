@@ -20,6 +20,9 @@ export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
       >
         {todo.title}
       </span>
+      <span className="text-xs text-gray-400">
+        {new Date(todo.createdAt).toLocaleDateString("en-AU")}
+      </span>
       <button
         onClick={() => onDelete(todo.id)}
         className="rounded px-2 py-1 text-sm text-red-500 hover:bg-red-50"
