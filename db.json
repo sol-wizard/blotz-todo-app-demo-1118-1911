@@ -1,0 +1,7 @@
+{
+  "todos": [
+    { "id": "1", "title": "Learn React", "completed": true, "createdAt": "2026-11-16T09:00:00.000Z" },
+    { "id": "2", "title": "Learn Next.js", "completed": false, "createdAt": "2026-11-17T09:00:00.000Z" },
+    { "id": "3", "title": "Build a to-do app", "completed": false, "createdAt": "2026-11-18T09:00:00.000Z" }
+  ]
+}
