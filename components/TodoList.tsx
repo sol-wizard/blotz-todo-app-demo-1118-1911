@@ -7,7 +7,7 @@ import { addTodo, deleteTodo, getAllTodos, updateTodo } from "@/lib/api";
 import { Todo } from "@/types/todo";
 
 export default function TodoList() {
-  const { data: todos = [], refetch } = useQuery({
+  const { data: todos = [], isPending, isError, refetch } = useQuery({
     queryKey: ["todos"],
     queryFn: getAllTodos,
   });
@@ -30,6 +30,10 @@ export default function TodoList() {
   return (
     <>
       <AddTaskDialog onSave={handleAdd} />
+      {isPending && <p className="text-muted-foreground">Loading tasks…</p>}
+      {isError && (
+        <p className="text-destructive">Could not load tasks. Is json-server running?</p>
+      )}
       <ul className="flex flex-col gap-2">
         {todos.map((todo) => (
           <TodoItem
