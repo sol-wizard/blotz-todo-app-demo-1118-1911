@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AddTaskDialog from "@/components/AddTaskDialog";
+import { Button } from "@/components/ui/button";
 import TodoItem from "@/components/TodoItem";
 import { addTodo, deleteTodo, getAllTodos, updateTodo } from "@/lib/api";
 import { Todo } from "@/types/todo";
@@ -34,6 +35,14 @@ export default function TodoList() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
   });
 
+  const clearDoneMutation = useMutation({
+    mutationFn: () =>
+      Promise.all(todos.filter((t) => t.completed).map((t) => deleteTodo(t.id))),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
+  });
+
+  const hasDone = todos.some((t) => t.completed);
+
   function handleToggle(todo: Todo) {
     toggleMutation.mutate(todo);
   }
@@ -44,7 +53,16 @@ export default function TodoList() {
 
   return (
     <>
-      <AddTaskDialog onSave={handleAdd} />
+      <div className="flex items-start gap-2">
+        <AddTaskDialog onSave={handleAdd} />
+        <Button
+          variant="outline"
+          disabled={!hasDone || clearDoneMutation.isPending}
+          onClick={() => clearDoneMutation.mutate()}
+        >
+          Clear completed
+        </Button>
+      </div>
       {isPending && <p className="text-muted-foreground">Loading tasks…</p>}
       {isError && (
         <p className="text-destructive">Could not load tasks. Is json-server running?</p>
