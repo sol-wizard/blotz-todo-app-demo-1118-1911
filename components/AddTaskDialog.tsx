@@ -1,6 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface AddTaskDialogProps {
   onSave: (title: string) => Promise<void>;
@@ -19,46 +30,27 @@ export default function AddTaskDialog({ onSave }: AddTaskDialogProps) {
   }
 
   return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="mb-4 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-      >
-        Add Task
-      </button>
-
-      {open && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 px-4">
-          <form
-            onSubmit={handleSubmit}
-            className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg"
-          >
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">New task</h2>
-            <input
-              autoFocus
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="What do you need to do?"
-              className="mb-4 w-full rounded border border-gray-300 px-3 py-2 text-gray-900"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded px-4 py-2 text-gray-600 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-              >
-                Save
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-    </>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button className="mb-4" />}>Add Task</DialogTrigger>
+      <DialogContent>
+        <form onSubmit={handleSubmit} className="grid gap-4">
+          <DialogHeader>
+            <DialogTitle>New task</DialogTitle>
+          </DialogHeader>
+          <Input
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="What do you need to do?"
+          />
+          <DialogFooter>
+            <DialogClose render={<Button type="button" variant="outline" />}>
+              Cancel
+            </DialogClose>
+            <Button type="submit">Save</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
