@@ -7,7 +7,7 @@ import { addTodo, deleteTodo, getAllTodos, updateTodo } from "@/lib/api";
 import { Todo } from "@/types/todo";
 
 export default function TodoList() {
-  const { data: todos = [], isPending, isError, refetch } = useQuery({
+  const { data: todos = [], isPending, isError } = useQuery({
     queryKey: ["todos"],
     queryFn: getAllTodos,
   });
@@ -24,14 +24,22 @@ export default function TodoList() {
     await addMutation.mutateAsync({ title, dueDate });
   }
 
-  async function handleToggle(todo: Todo) {
-    await updateTodo(todo.id, !todo.completed);
-    await refetch();
+  const toggleMutation = useMutation({
+    mutationFn: (todo: Todo) => updateTodo(todo.id, !todo.completed),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteTodo(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
+  });
+
+  function handleToggle(todo: Todo) {
+    toggleMutation.mutate(todo);
   }
 
-  async function handleDelete(id: string) {
-    await deleteTodo(id);
-    await refetch();
+  function handleDelete(id: string) {
+    deleteMutation.mutate(id);
   }
 
   return (
