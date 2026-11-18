@@ -13,8 +13,8 @@ interface TodoListProps {
 export default function TodoList({ initialTodos }: TodoListProps) {
   const [todos, setTodos] = useState<Todo[]>(initialTodos);
 
-  async function handleAdd(title: string) {
-    const newTodo = await addTodo(title);
+  async function handleAdd(title: string, dueDate?: string) {
+    const newTodo = await addTodo(title, dueDate);
     setTodos([...todos, newTodo]);
   }
 

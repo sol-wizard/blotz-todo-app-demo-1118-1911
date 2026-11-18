@@ -24,7 +24,9 @@ export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
           {todo.title}
         </span>
         <span className="text-xs text-muted-foreground">
-          {new Date(todo.createdAt).toLocaleDateString("en-AU")}
+          {todo.dueDate
+            ? `Due ${new Date(todo.dueDate).toLocaleDateString("en-AU")}`
+            : new Date(todo.createdAt).toLocaleDateString("en-AU")}
         </span>
         <Button variant="destructive" size="sm" onClick={() => onDelete(todo.id)}>
           Delete

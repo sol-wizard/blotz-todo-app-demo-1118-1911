@@ -18,19 +18,19 @@ import { Input } from "@/components/ui/input";
 import { taskSchema, TaskFormValues } from "@/lib/schema";
 
 interface AddTaskDialogProps {
-  onSave: (title: string) => Promise<void>;
+  onSave: (title: string, dueDate?: string) => Promise<void>;
 }
 
 export default function AddTaskDialog({ onSave }: AddTaskDialogProps) {
   const [open, setOpen] = useState(false);
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
-    defaultValues: { title: "" },
+    defaultValues: { title: "", dueDate: "" },
   });
 
   async function onSubmit(values: TaskFormValues) {
     try {
-      await onSave(values.title);
+      await onSave(values.title, values.dueDate || undefined);
       form.reset();
       setOpen(false);
     } catch {
@@ -58,6 +58,22 @@ export default function AddTaskDialog({ onSave }: AddTaskDialogProps) {
                   autoFocus
                   aria-invalid={fieldState.invalid}
                   placeholder="What do you need to do?"
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+          <Controller
+            name="dueDate"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="dueDate">Due date (optional)</FieldLabel>
+                <Input
+                  {...field}
+                  id="dueDate"
+                  type="date"
+                  aria-invalid={fieldState.invalid}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>

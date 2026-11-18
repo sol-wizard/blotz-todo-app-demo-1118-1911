@@ -7,7 +7,7 @@ export async function getAllTodos(): Promise<Todo[]> {
   return res.json();
 }
 
-export async function addTodo(title: string): Promise<Todo> {
+export async function addTodo(title: string, dueDate?: string): Promise<Todo> {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -16,6 +16,7 @@ export async function addTodo(title: string): Promise<Todo> {
       title,
       completed: false,
       createdAt: new Date().toISOString(),
+      ...(dueDate ? { dueDate } : {}),
     }),
   });
   if (!res.ok) throw new Error("Could not save the task");
