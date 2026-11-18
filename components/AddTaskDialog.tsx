@@ -1,64 +1,97 @@
 "use client";
 
 import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { taskSchema, TaskFormValues } from "@/lib/schema";
 
 interface AddTaskDialogProps {
-  onSave: (title: string) => Promise<void>;
+  onSave: (title: string, dueDate?: string) => Promise<void>;
 }
 
 export default function AddTaskDialog({ onSave }: AddTaskDialogProps) {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
+  const form = useForm<TaskFormValues>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: { title: "", dueDate: "" },
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!title.trim()) return;
-    await onSave(title.trim());
-    setTitle("");
-    setOpen(false);
+  async function onSubmit(values: TaskFormValues) {
+    try {
+      await onSave(values.title, values.dueDate || undefined);
+      form.reset();
+      setOpen(false);
+    } catch {
+      form.setError("root", { message: "Could not save. Please try again." });
+    }
   }
 
   return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="mb-4 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-      >
-        Add Task
-      </button>
-
-      {open && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 px-4">
-          <form
-            onSubmit={handleSubmit}
-            className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg"
-          >
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">New task</h2>
-            <input
-              autoFocus
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="What do you need to do?"
-              className="mb-4 w-full rounded border border-gray-300 px-3 py-2 text-gray-900"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded px-4 py-2 text-gray-600 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-              >
-                Save
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-    </>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button className="mb-4" />}>Add Task</DialogTrigger>
+      <DialogContent>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+          <DialogHeader>
+            <DialogTitle>New task</DialogTitle>
+          </DialogHeader>
+          <Controller
+            name="title"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="title">Title</FieldLabel>
+                <Input
+                  {...field}
+                  id="title"
+                  autoFocus
+                  aria-invalid={fieldState.invalid}
+                  placeholder="What do you need to do?"
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+          <Controller
+            name="dueDate"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="dueDate">Due date (optional)</FieldLabel>
+                <Input
+                  {...field}
+                  id="dueDate"
+                  type="date"
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+          {form.formState.errors.root && (
+            <FieldError>{form.formState.errors.root.message}</FieldError>
+          )}
+          <DialogFooter>
+            <DialogClose render={<Button type="button" variant="outline" />}>
+              Cancel
+            </DialogClose>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              Save
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

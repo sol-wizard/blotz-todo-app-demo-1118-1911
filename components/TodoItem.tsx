@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Todo } from "@/types/todo";
 
 interface TodoItemProps {
@@ -8,27 +10,28 @@ interface TodoItemProps {
 
 export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
   return (
-    <li className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
-      <input
-        type="checkbox"
-        checked={todo.completed}
-        onChange={() => onToggle(todo)}
-        className="h-4 w-4 cursor-pointer"
-      />
-      <span
-        className={`flex-1 ${todo.completed ? "text-gray-400 line-through" : "text-gray-800"}`}
-      >
-        {todo.title}
-      </span>
-      <span className="text-xs text-gray-400">
-        {new Date(todo.createdAt).toLocaleDateString("en-AU")}
-      </span>
-      <button
-        onClick={() => onDelete(todo.id)}
-        className="rounded px-2 py-1 text-sm text-red-500 hover:bg-red-50"
-      >
-        Delete
-      </button>
+    <li>
+      <Card className="flex flex-row items-center gap-3 px-4 py-3">
+        <input
+          type="checkbox"
+          checked={todo.completed}
+          onChange={() => onToggle(todo)}
+          className="h-4 w-4 cursor-pointer"
+        />
+        <span
+          className={`flex-1 ${todo.completed ? "text-muted-foreground line-through" : ""}`}
+        >
+          {todo.title}
+        </span>
+        <span className="text-xs text-muted-foreground">
+          {todo.dueDate
+            ? `Due ${new Date(todo.dueDate).toLocaleDateString("en-AU")}`
+            : new Date(todo.createdAt).toLocaleDateString("en-AU")}
+        </span>
+        <Button variant="destructive" size="sm" onClick={() => onDelete(todo.id)}>
+          Delete
+        </Button>
+      </Card>
     </li>
   );
 }
