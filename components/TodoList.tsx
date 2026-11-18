@@ -1,31 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import AddTaskDialog from "@/components/AddTaskDialog";
 import TodoItem from "@/components/TodoItem";
-import { addTodo, deleteTodo, updateTodo } from "@/lib/api";
+import { addTodo, deleteTodo, getAllTodos, updateTodo } from "@/lib/api";
 import { Todo } from "@/types/todo";
 
-interface TodoListProps {
-  initialTodos: Todo[];
-}
-
-export default function TodoList({ initialTodos }: TodoListProps) {
-  const [todos, setTodos] = useState<Todo[]>(initialTodos);
+export default function TodoList() {
+  const { data: todos = [], refetch } = useQuery({
+    queryKey: ["todos"],
+    queryFn: getAllTodos,
+  });
 
   async function handleAdd(title: string, dueDate?: string) {
-    const newTodo = await addTodo(title, dueDate);
-    setTodos([...todos, newTodo]);
+    await addTodo(title, dueDate);
+    await refetch();
   }
 
   async function handleToggle(todo: Todo) {
-    const updated = await updateTodo(todo.id, !todo.completed);
-    setTodos(todos.map((t) => (t.id === updated.id ? updated : t)));
+    await updateTodo(todo.id, !todo.completed);
+    await refetch();
   }
 
   async function handleDelete(id: string) {
     await deleteTodo(id);
-    setTodos(todos.filter((t) => t.id !== id));
+    await refetch();
   }
 
   return (
