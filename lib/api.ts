@@ -15,3 +15,16 @@ export async function addTodo(title: string): Promise<Todo> {
   });
   return res.json();
 }
+
+export async function deleteTodo(id: string): Promise<void> {
+  await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+}
+
+export async function updateTodo(id: string, completed: boolean): Promise<Todo> {
+  const res = await fetch(`${API_URL}/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ completed }),
+  });
+  return res.json();
+}
