@@ -29,9 +29,13 @@ export default function AddTaskDialog({ onSave }: AddTaskDialogProps) {
   });
 
   async function onSubmit(values: TaskFormValues) {
-    await onSave(values.title);
-    form.reset();
-    setOpen(false);
+    try {
+      await onSave(values.title);
+      form.reset();
+      setOpen(false);
+    } catch {
+      form.setError("root", { message: "Could not save. Please try again." });
+    }
   }
 
   return (
@@ -59,11 +63,16 @@ export default function AddTaskDialog({ onSave }: AddTaskDialogProps) {
               </Field>
             )}
           />
+          {form.formState.errors.root && (
+            <FieldError>{form.formState.errors.root.message}</FieldError>
+          )}
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" />}>
               Cancel
             </DialogClose>
-            <Button type="submit">Save</Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              Save
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

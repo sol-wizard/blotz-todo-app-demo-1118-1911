@@ -18,6 +18,7 @@ export async function addTodo(title: string): Promise<Todo> {
       createdAt: new Date().toISOString(),
     }),
   });
+  if (!res.ok) throw new Error("Could not save the task");
   return res.json();
 }
 
