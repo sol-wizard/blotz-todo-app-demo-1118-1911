@@ -1,36 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AddTaskDialog from "@/components/AddTaskDialog";
+import { Button } from "@/components/ui/button";
 import TodoItem from "@/components/TodoItem";
-import { addTodo, deleteTodo, updateTodo } from "@/lib/api";
+import { addTodo, deleteTodo, getAllTodos, updateTodo } from "@/lib/api";
 import { Todo } from "@/types/todo";
 
-interface TodoListProps {
-  initialTodos: Todo[];
-}
+export default function TodoList() {
+  const { data: todos = [], isPending, isError } = useQuery({
+    queryKey: ["todos"],
+    queryFn: getAllTodos,
+  });
 
-export default function TodoList({ initialTodos }: TodoListProps) {
-  const [todos, setTodos] = useState<Todo[]>(initialTodos);
+  const queryClient = useQueryClient();
+
+  const addMutation = useMutation({
+    mutationFn: ({ title, dueDate }: { title: string; dueDate?: string }) =>
+      addTodo(title, dueDate),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
+  });
 
   async function handleAdd(title: string, dueDate?: string) {
-    const newTodo = await addTodo(title, dueDate);
-    setTodos([...todos, newTodo]);
+    await addMutation.mutateAsync({ title, dueDate });
   }
 
-  async function handleToggle(todo: Todo) {
-    const updated = await updateTodo(todo.id, !todo.completed);
-    setTodos(todos.map((t) => (t.id === updated.id ? updated : t)));
+  const toggleMutation = useMutation({
+    mutationFn: (todo: Todo) => updateTodo(todo.id, !todo.completed),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteTodo(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
+  });
+
+  const clearDoneMutation = useMutation({
+    mutationFn: () =>
+      Promise.all(todos.filter((t) => t.completed).map((t) => deleteTodo(t.id))),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
+  });
+
+  const hasDone = todos.some((t) => t.completed);
+
+  function handleToggle(todo: Todo) {
+    toggleMutation.mutate(todo);
   }
 
-  async function handleDelete(id: string) {
-    await deleteTodo(id);
-    setTodos(todos.filter((t) => t.id !== id));
+  function handleDelete(id: string) {
+    deleteMutation.mutate(id);
   }
 
   return (
     <>
-      <AddTaskDialog onSave={handleAdd} />
+      <div className="flex items-start gap-2">
+        <AddTaskDialog onSave={handleAdd} />
+        <Button
+          variant="outline"
+          disabled={!hasDone || clearDoneMutation.isPending}
+          onClick={() => clearDoneMutation.mutate()}
+        >
+          Clear completed
+        </Button>
+      </div>
+      {isPending && <p className="text-muted-foreground">Loading tasks…</p>}
+      {isError && (
+        <p className="text-destructive">Could not load tasks. Is json-server running?</p>
+      )}
       <ul className="flex flex-col gap-2">
         {todos.map((todo) => (
           <TodoItem
