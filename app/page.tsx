@@ -1,13 +1,9 @@
 import TodoItem from "@/components/TodoItem";
-import { Todo } from "@/types/todo";
+import { getAllTodos } from "@/lib/api";
 
-const todos: Todo[] = [
-  { id: "1", title: "Learn React", completed: true },
-  { id: "2", title: "Learn Next.js", completed: false },
-  { id: "3", title: "Build a to-do app", completed: false },
-];
+export default async function Home() {
+  const todos = await getAllTodos();
 
-export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="mx-auto max-w-md">
